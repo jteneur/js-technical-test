@@ -10,7 +10,15 @@ class Stats extends Component {
 
   render () {
     return (
-      null
+      <div>
+        <h2>Statistiques</h2>
+        {this.props.results.map(u => {
+          return (
+            <p>User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>
+          )
+        })}
+        <hr></hr>
+      </div>
     )
   }
 }

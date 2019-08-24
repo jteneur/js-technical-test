@@ -16,8 +16,48 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      issueComments: []
+      issueComments: [],
+      wordCount: []
     }
+  }
+
+  /**
+   * Fonction pour compter le nombre de mots dans une chaîne de caractères
+   * @param {[string]} texte à analyser
+   * @return {[int]} nombre de mots
+   */
+  wordCount = (s) => {
+    return s.split(" ").length
+  }
+
+  /**
+   * Fonction pour référencer le nombre total de mots par user
+   * @return this.state.wordCount => Array d'objets {count, userId, userLogin}
+   */
+  countResults = () => {
+    let results = []
+    this.state.issueComments.map(comment => {
+      /**
+       * On détermine si l'userId de l'auteur du commentaire est déjà présent
+       * dans l'Array des résultats. Si oui, on récupère sa position dans
+       * l'Array et on met à jour le compte de mots en y ajoutant le compte du
+       * commentaire en cours. Sinon, on l'ajoute dans l'Array avec le compte de
+       * mots du commentaire.
+       */
+      if (results.some(result => comment.userId === result.userId)) {
+        const foundIndex = results.findIndex(x => x.userId === comment.userId)
+        results[foundIndex].count += this.wordCount(comment.body)
+      }
+      else {
+        results.push({
+          count: this.wordCount(comment.body),
+          userId: comment.userId,
+          userLogin: comment.userLogin
+        })
+      }
+      return null
+    })
+    this.setState({ wordCount: results })
   }
 
   async componentDidMount() {
@@ -54,6 +94,7 @@ class App extends Component {
       )
     })
     this.setState({ issueComments: issueComments })
+    this.countResults()
   }
 
   render() {
@@ -61,7 +102,7 @@ class App extends Component {
       <div>
         <IssueInput />
         <Filters />
-        <Stats />
+        <Stats results={this.state.wordCount} />
         <Issue issueComments={this.state.issueComments} />
       </div>
     )
@@ -94,7 +135,7 @@ export default App;
  *    => npm i @octokit/rest de Github
  *    => créer auth token sur Github : 7f18a14eb72a7c25941fb630582ca58b359c380f
  * DONE. Afficher le flux de discussion
- * 2b. Déterminer qui est l'auteur
+ * DONE. Déterminer qui est l'auteur
  * 3. Analyser le flux pour définir le plus bavard
  * 4. Permettre le chargement de l'Url de l'issue par IssueInput
  * 5. Ajouter la possibilité de filtrer
