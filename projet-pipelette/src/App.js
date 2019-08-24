@@ -82,6 +82,13 @@ class App extends Component {
     return indexes
   }
 
+  /**
+   * Fonction pour mettre à jour les commentaires selon les users affichés/
+   * masqués
+   * @param  {[int]} userId id de l'user
+   * @param  {[bool]} status true = à afficher, false = à masquer
+   * @return {[type]} met à jour l'état issueComments et les stats
+   */
   filterResults(userId, status) {
     const issueComments = this.state.issueComments
     const foundIndexes = this.getAllIndexes(issueComments, userId)
@@ -92,8 +99,20 @@ class App extends Component {
     this.countResults()
   }
 
+  /**
+   * Charge les données d'issue Github
+   * @param  {[string]}  url Adresse de l'issue
+   * @return {Promise}   instancie l'état local issueComments
+   */
   async loadData(url) {
-    this.setState({ dataUrl: url })
+
+    // Check if issue url from Github
+    const regex = /^https:\/\/(www\.)?github\.com\/[a-z0-9\-]+\/[a-z0-9\-]+\/issues\/[0-9]+$/
+    if(!url.match(regex)) {
+      alert('URL incorrecte')
+      return null
+    }
+
     const dataUrl = url.split('/')
     //3: Author, 4: Repo, 5: Issue number
     const OWNER = dataUrl[3]
@@ -106,6 +125,7 @@ class App extends Component {
       repo: REPO,
       issue_number: ISSUE_NUMBER
     })
+    this.setState({ dataUrl: url })
     const authorUserId = issueRequest.user.id
 
     // Fetch comments on given issue
@@ -176,7 +196,7 @@ export default App;
  * DONE. Déterminer qui est l'auteur
  * DONE. Analyser le flux pour définir le plus bavard
  * DONE. Permettre le chargement de l'Url de l'issue par IssueInput
- * 5. Ajouter la possibilité de filtrer
+ * DONE. Ajouter la possibilité de filtrer
  * 5b. Regex url pour vérifier github issue etc.
  * 5c. Aggréger tous les messages quand plusieurs pages à l'issue
  * 6. css
