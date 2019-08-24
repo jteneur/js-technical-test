@@ -21,7 +21,6 @@ class App extends Component {
     this.state = {
       issueComments: [],
       wordCount: [],
-      users: [],
       dataUrl: ""
     }
   }
@@ -107,11 +106,14 @@ class App extends Component {
   async loadData(url) {
 
     // Check if issue url from Github
-    const regex = /^https:\/\/(www\.)?github\.com\/[a-z0-9\-]+\/[a-z0-9\-]+\/issues\/[0-9]+$/
+    const regex = /^https:\/\/(www\.)?github\.com\/[a-z0-9-]+\/[a-z0-9-]+\/issues\/[0-9]+$/
     if(!url.match(regex)) {
       alert('URL incorrecte')
       return null
     }
+
+    // Reset local states
+    this.setState({ issueComments: [], wordCount: [] })
 
     const dataUrl = url.split('/')
     //3: Author, 4: Repo, 5: Issue number
@@ -127,12 +129,17 @@ class App extends Component {
     })
     this.setState({ dataUrl: url })
     const authorUserId = issueRequest.user.id
+    // Load comments starting with page 1
+    this.loadComments(OWNER, REPO, ISSUE_NUMBER, authorUserId)
+  }
 
-    // Fetch comments on given issue
+  async loadComments(OWNER, REPO, ISSUE_NUMBER, authorUserId, page) {
+    page || (page = 1)
     const { data: issueCommentsRequest } = await octokit.issues.listComments({
       owner: OWNER,
       repo: REPO,
-      issue_number: ISSUE_NUMBER
+      issue_number: ISSUE_NUMBER,
+      page: page
     })
     const issueComments = await issueCommentsRequest.map(comment => {
       const isAuthor = comment.user.id === authorUserId ? true : false
@@ -148,7 +155,11 @@ class App extends Component {
         }
       )
     })
-    this.setState({ issueComments: issueComments })
+    // if next page results aren't empty, add them to local state
+    if(issueCommentsRequest && issueCommentsRequest.length) {
+      this.setState({ issueComments: [...this.state.issueComments, ...issueComments]})
+      this.loadComments(OWNER, REPO, ISSUE_NUMBER, authorUserId, page + 1)
+    }
     this.countResults()
   }
 
@@ -197,7 +208,7 @@ export default App;
  * DONE. Analyser le flux pour définir le plus bavard
  * DONE. Permettre le chargement de l'Url de l'issue par IssueInput
  * DONE. Ajouter la possibilité de filtrer
- * 5b. Regex url pour vérifier github issue etc.
+ * DONE. Regex url pour vérifier github issue etc.
  * 5c. Aggréger tous les messages quand plusieurs pages à l'issue
  * 6. css
  */

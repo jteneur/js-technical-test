@@ -16,6 +16,7 @@ class Stats extends Component {
   }
 
   render () {
+    let i = 1 // Position sur le podium
     return (
       <div>
         <h2>Statistiques</h2>
@@ -26,8 +27,11 @@ class Stats extends Component {
         {this.props.results.sort(this.sortResults).map(u => {
           if(!u.isHidden) {
             return (
-              <p>User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>
+              <p>{i++}. User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>
             )
+          }
+          else {
+            return null
           }
         })}
         <hr></hr>
