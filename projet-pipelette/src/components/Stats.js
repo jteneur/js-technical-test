@@ -19,6 +19,10 @@ class Stats extends Component {
     return (
       <div>
         <h2>Statistiques</h2>
+        <p>
+          <strong>URL analysée :</strong>
+          {this.props.dataUrl}
+        </p>
         {this.props.results.sort(this.sortResults).map(u => {
           return (
             <p>User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>

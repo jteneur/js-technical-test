@@ -15,9 +15,12 @@ const octokit = new Octokit({
 class App extends Component {
   constructor() {
     super()
+    // Bind pour utiliser la fonction loadData depuis le composant <IssueInput />
+    this.loadData = this.loadData.bind(this)
     this.state = {
       issueComments: [],
-      wordCount: []
+      wordCount: [],
+      dataUrl: ""
     }
   }
 
@@ -60,11 +63,15 @@ class App extends Component {
     this.setState({ wordCount: results })
   }
 
-  async componentDidMount() {
+  async loadData(url) {
 
-    const OWNER = 'nodejs'
-    const REPO = 'node'
-    const ISSUE_NUMBER = 6867
+    this.setState({ dataUrl: url })
+    const dataUrl = url.split('/')
+    //3: Author, 4: Repo, 5: Issue number
+    console.log(dataUrl)
+    const OWNER = dataUrl[3]
+    const REPO = dataUrl[4]
+    const ISSUE_NUMBER = dataUrl[6]
 
     // Fetch user.id of author of issue
     const { data: issueRequest } = await octokit.issues.get({
@@ -97,13 +104,16 @@ class App extends Component {
     this.countResults()
   }
 
+  inputElement = React.createRef()
+
   render() {
+    const { wordCount, issueComments, dataUrl } = this.state
     return (
       <div>
-        <IssueInput />
+        <IssueInput inputElement={this.inputElement} loadData={this.loadData} />
         <Filters />
-        <Stats results={this.state.wordCount} />
-        <Issue issueComments={this.state.issueComments} />
+        <Stats dataUrl={dataUrl} results={wordCount} />
+        <Issue issueComments={issueComments} />
       </div>
     )
   }
@@ -136,7 +146,7 @@ export default App;
  *    => créer auth token sur Github : 7f18a14eb72a7c25941fb630582ca58b359c380f
  * DONE. Afficher le flux de discussion
  * DONE. Déterminer qui est l'auteur
- * 3. Analyser le flux pour définir le plus bavard
+ * DONE. Analyser le flux pour définir le plus bavard
  * 4. Permettre le chargement de l'Url de l'issue par IssueInput
  * 5. Ajouter la possibilité de filtrer
  * 6. css
