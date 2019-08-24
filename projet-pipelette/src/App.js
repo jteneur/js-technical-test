@@ -16,18 +16,30 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-
+      issueComments: []
     }
   }
 
   async componentDidMount() {
-    // Fetch given issue to test Octokit
-    const { data: issueRequest } = await octokit.issues.get({
+
+    // Fetch comments on given issue
+    const { data: issueCommentsRequest } = await octokit.issues.listComments({
       owner: 'nodejs',
       repo: 'node',
       issue_number: 6867
     })
-    console.log(issueRequest)
+    const issueComments = await issueCommentsRequest.map(comment => {
+      return (
+        {
+          id: comment.id,
+          body: comment.body,
+          userId: comment.user.id,
+          userLogin: comment.user.login,
+          userAvatar_url: comment.user.avatar_url
+        }
+      )
+    })
+    this.setState({ issueComments: issueComments })
   }
 
   render() {
@@ -36,7 +48,7 @@ class App extends Component {
         <IssueInput />
         <Filters />
         <Stats />
-        <Issue />
+        <Issue issueComments={this.state.issueComments} />
       </div>
     )
   }

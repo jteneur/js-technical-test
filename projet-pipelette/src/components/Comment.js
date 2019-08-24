@@ -9,8 +9,15 @@ class Comment extends Component {
   }
 
   render () {
+    const { userAvatar_url, userLogin, id, body } = this.props.comment
+    // TODO: Supprimer width & height une fois css implémenté
     return (
-      null
+      <div key={id}>
+        <img width="30" height="30" src={userAvatar_url} alt={userLogin} />
+        <p><strong>{userLogin}</strong></p>
+        <p>{body}</p>
+        <hr></hr>
+      </div>
     )
   }
 }
