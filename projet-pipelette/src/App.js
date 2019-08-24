@@ -22,20 +22,34 @@ class App extends Component {
 
   async componentDidMount() {
 
+    const OWNER = 'nodejs'
+    const REPO = 'node'
+    const ISSUE_NUMBER = 6867
+
+    // Fetch user.id of author of issue
+    const { data: issueRequest } = await octokit.issues.get({
+      owner: OWNER,
+      repo: REPO,
+      issue_number: ISSUE_NUMBER
+    })
+    const authorUserId = issueRequest.user.id
+
     // Fetch comments on given issue
     const { data: issueCommentsRequest } = await octokit.issues.listComments({
-      owner: 'nodejs',
-      repo: 'node',
-      issue_number: 6867
+      owner: OWNER,
+      repo: REPO,
+      issue_number: ISSUE_NUMBER
     })
     const issueComments = await issueCommentsRequest.map(comment => {
+      const isAuthor = comment.user.id === authorUserId ? true : false
       return (
         {
           id: comment.id,
           body: comment.body,
           userId: comment.user.id,
           userLogin: comment.user.login,
-          userAvatar_url: comment.user.avatar_url
+          userAvatar_url: comment.user.avatar_url,
+          isAuthor: isAuthor
         }
       )
     })
@@ -76,10 +90,11 @@ export default App;
  * Comment : Un commentaire du flux
  *
  * Etapes :
- * 1. Récupérer une issue Github définie
+ * DONE. Récupérer une issue Github définie
  *    => npm i @octokit/rest de Github
  *    => créer auth token sur Github : 7f18a14eb72a7c25941fb630582ca58b359c380f
- * 2. Afficher le flux de discussion
+ * DONE. Afficher le flux de discussion
+ * 2b. Déterminer qui est l'auteur
  * 3. Analyser le flux pour définir le plus bavard
  * 4. Permettre le chargement de l'Url de l'issue par IssueInput
  * 5. Ajouter la possibilité de filtrer
