@@ -17,9 +17,11 @@ class App extends Component {
     super()
     // Bind pour utiliser la fonction loadData depuis le composant <IssueInput />
     this.loadData = this.loadData.bind(this)
+    this.filterResults = this.filterResults.bind(this)
     this.state = {
       issueComments: [],
       wordCount: [],
+      users: [],
       dataUrl: ""
     }
   }
@@ -55,7 +57,8 @@ class App extends Component {
         results.push({
           count: this.wordCount(comment.body),
           userId: comment.userId,
-          userLogin: comment.userLogin
+          userLogin: comment.userLogin,
+          isHidden: comment.isHidden
         })
       }
       return null
@@ -63,12 +66,36 @@ class App extends Component {
     this.setState({ wordCount: results })
   }
 
-  async loadData(url) {
+  /**
+   * Find all indexes of given userId in comments array
+   * @param  {[Array]} comments Array of comments objects
+   * @param  {[Int]} userId   userInd to find
+   * @return {[Array]}  Array of all indexes found
+   */
+  getAllIndexes = (comments, userId) => {
+    let indexes = []
+    for (let i = 0 ; i < comments.length ; i++) {
+      if (comments[i].userId === userId) {
+        indexes.push(i)
+      }
+    }
+    return indexes
+  }
 
+  filterResults(userId, status) {
+    const issueComments = this.state.issueComments
+    const foundIndexes = this.getAllIndexes(issueComments, userId)
+    foundIndexes.forEach(c => {
+      issueComments[c].isHidden = !status
+    })
+    this.setState({ issueComments: issueComments })
+    this.countResults()
+  }
+
+  async loadData(url) {
     this.setState({ dataUrl: url })
     const dataUrl = url.split('/')
     //3: Author, 4: Repo, 5: Issue number
-    console.log(dataUrl)
     const OWNER = dataUrl[3]
     const REPO = dataUrl[4]
     const ISSUE_NUMBER = dataUrl[6]
@@ -96,7 +123,8 @@ class App extends Component {
           userId: comment.user.id,
           userLogin: comment.user.login,
           userAvatar_url: comment.user.avatar_url,
-          isAuthor: isAuthor
+          isAuthor: isAuthor,
+          isHidden: false
         }
       )
     })
@@ -111,7 +139,7 @@ class App extends Component {
     return (
       <div>
         <IssueInput inputElement={this.inputElement} loadData={this.loadData} />
-        <Filters />
+        <Filters filters={wordCount} filterResults={this.filterResults} />
         <Stats dataUrl={dataUrl} results={wordCount} />
         <Issue issueComments={issueComments} />
       </div>
@@ -147,7 +175,9 @@ export default App;
  * DONE. Afficher le flux de discussion
  * DONE. Déterminer qui est l'auteur
  * DONE. Analyser le flux pour définir le plus bavard
- * 4. Permettre le chargement de l'Url de l'issue par IssueInput
+ * DONE. Permettre le chargement de l'Url de l'issue par IssueInput
  * 5. Ajouter la possibilité de filtrer
+ * 5b. Regex url pour vérifier github issue etc.
+ * 5c. Aggréger tous les messages quand plusieurs pages à l'issue
  * 6. css
  */

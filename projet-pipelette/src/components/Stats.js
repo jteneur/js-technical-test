@@ -24,9 +24,11 @@ class Stats extends Component {
           {this.props.dataUrl}
         </p>
         {this.props.results.sort(this.sortResults).map(u => {
-          return (
-            <p>User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>
-          )
+          if(!u.isHidden) {
+            return (
+              <p>User: {u.userLogin} (uid: {u.userId}), Words: {u.count}</p>
+            )
+          }
         })}
         <hr></hr>
       </div>
