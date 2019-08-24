@@ -5,12 +5,29 @@ import Filters from './components/Filters.js'
 import Stats from './components/Stats.js'
 import Issue from './components/Issue.js'
 
+// Instanciation octokit/rest
+const Octokit = require('@octokit/rest')
+const octokit = new Octokit({
+  auth: '7f18a14eb72a7c25941fb630582ca58b359c380f',
+  userAgent: 'ProjetPipelette v1.0.0'
+})
+
 class App extends Component {
   constructor() {
     super()
     this.state = {
 
     }
+  }
+
+  async componentDidMount() {
+    // Fetch given issue to test Octokit
+    const { data: issueRequest } = await octokit.issues.get({
+      owner: 'nodejs',
+      repo: 'node',
+      issue_number: 6867
+    })
+    console.log(issueRequest)
   }
 
   render() {
@@ -45,4 +62,14 @@ export default App;
  * Stats : Afficher le participant le plus bavard
  * Issue : Flux de commentaires de l'issue donnée
  * Comment : Un commentaire du flux
+ *
+ * Etapes :
+ * 1. Récupérer une issue Github définie
+ *    => npm i @octokit/rest de Github
+ *    => créer auth token sur Github : 7f18a14eb72a7c25941fb630582ca58b359c380f
+ * 2. Afficher le flux de discussion
+ * 3. Analyser le flux pour définir le plus bavard
+ * 4. Permettre le chargement de l'Url de l'issue par IssueInput
+ * 5. Ajouter la possibilité de filtrer
+ * 6. css
  */
